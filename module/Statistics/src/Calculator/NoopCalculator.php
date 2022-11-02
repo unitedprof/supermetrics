@@ -12,9 +12,37 @@ class NoopCalculator extends AbstractCalculator
     /**
      * @inheritDoc
      */
+    protected const UNITS = 'posts';
+
+    /**
+     * @var int
+     */
+    private $userCount = 0;
+
+    /**
+     * @var int
+     */
+    private $postCount = 0;
+
+/**
+     * @var [string]
+     */
+    private $users = array();
+
+
+    /**
+     * @param SocialPostTo $postTo
+     */
+
     protected function doAccumulate(SocialPostTo $postTo): void
     {
         // Noops!
+        $this->postCount++;
+        $authorid = $postTo->getAuthorId();
+        if (!array_key_exists($authorid, $this->users)) {
+            $this->userCount++;
+            $this->users[$authorid] = 1;
+        }     
     }
 
     /**
@@ -22,6 +50,9 @@ class NoopCalculator extends AbstractCalculator
      */
     protected function doCalculate(): StatisticsTo
     {
-        return new StatisticsTo();
+        $value = $this->userCount > 0
+            ? $this->postCount / $this->userCount
+            : 0;
+        return (new StatisticsTo())->setValue(round($value,2));
     }
 }
